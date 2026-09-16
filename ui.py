@@ -70,12 +70,18 @@ def render_login_screen() -> None:
     st.markdown("## Owens & Minor")
     st.markdown("### Teammate Training & Development")
 
+    configured_password = st.secrets.get("prototype_password") or os.getenv(
+        "OM_TRAINING_APP_PASSWORD"
+    )
+    if not configured_password:
+        st.error(
+            "Application password is not configured. Set `prototype_password` in Streamlit "
+            "secrets or set `OM_TRAINING_APP_PASSWORD` in your environment."
+        )
+        return
+
     password = st.text_input("Password", type="password")
     if st.button("Login", type="primary"):
-        configured_password = st.secrets.get(
-            "prototype_password",
-            os.getenv("OM_TRAINING_APP_PASSWORD", "Platinum2025"),
-        )
         if password == configured_password:
             st.session_state["authenticated"] = True
             st.session_state["current_screen"] = "select_context"

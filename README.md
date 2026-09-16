@@ -53,14 +53,21 @@ pip install -r requirements.txt
 
 ## Run the Application
 
+Set one of the following before launching (prototype value shown):  
+`OM_TRAINING_APP_PASSWORD=Platinum2025`  
+or `.streamlit/secrets.toml`:
+
+```toml
+prototype_password = "Platinum2025"
+```
+
 ```bash
 streamlit run app.py
 ```
 
 ## Prototype Login
 
-- Default password: `Platinum2025`
-- Optional override: set `prototype_password` in `.streamlit/secrets.toml` or set environment variable `OM_TRAINING_APP_PASSWORD`
+- Prototype password value: `Platinum2025`
 
 ## Dummy Data Notes
 

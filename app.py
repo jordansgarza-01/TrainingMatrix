@@ -21,11 +21,16 @@ st.set_page_config(
 )
 
 
+@st.cache_data
+def get_training_records():
+    return load_training_data()
+
+
 def main() -> None:
     apply_styles()
     initialize_session_state()
 
-    records = load_training_data()
+    records = get_training_records()
 
     if not st.session_state.get("authenticated"):
         render_login_screen()

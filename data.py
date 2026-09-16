@@ -265,12 +265,17 @@ def get_supervisors_for_business_line(business_line: str) -> List[str]:
     return BUSINESS_LINE_SUPERVISORS.get(business_line, [])
 
 
-def get_teammates_for_supervisor(records: List[Dict[str, object]], supervisor: str) -> List[str]:
+def get_teammates_for_supervisor(
+    records: List[Dict[str, object]],
+    supervisor: str,
+    business_line: Optional[str] = None,
+) -> List[str]:
     return sorted(
         [
             str(record["teammate_name"])
             for record in records
             if record.get("supervisor") == supervisor
+            and (business_line is None or record.get("business_line") == business_line)
         ]
     )
 

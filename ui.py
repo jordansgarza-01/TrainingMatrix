@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
@@ -71,7 +72,11 @@ def render_login_screen() -> None:
 
     password = st.text_input("Password", type="password")
     if st.button("Login", type="primary"):
-        if password == "Platinum2025":
+        configured_password = st.secrets.get(
+            "prototype_password",
+            os.getenv("OM_TRAINING_APP_PASSWORD", "Platinum2025"),
+        )
+        if password == configured_password:
             st.session_state["authenticated"] = True
             st.session_state["current_screen"] = "select_context"
             st.rerun()
@@ -149,7 +154,7 @@ def render_teammate_selection(records: List[Dict[str, object]]) -> None:
         return
 
     st.markdown("## Select Teammate")
-    teammates = get_teammates_for_supervisor(records, supervisor)
+    teammates = get_teammates_for_supervisor(records, supervisor, business_line)
 
     if not teammates:
         st.error("No teammate records found for this Supervisor.")

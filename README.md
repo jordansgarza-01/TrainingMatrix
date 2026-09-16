@@ -59,7 +59,8 @@ streamlit run app.py
 
 ## Prototype Login
 
-- Password: `Platinum2025`
+- Default password: `Platinum2025`
+- Optional override: set `prototype_password` in `.streamlit/secrets.toml` or set environment variable `OM_TRAINING_APP_PASSWORD`
 
 ## Dummy Data Notes
 

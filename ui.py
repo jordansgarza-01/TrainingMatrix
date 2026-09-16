@@ -237,9 +237,9 @@ def _render_status_table(title, status_dict, category_column, status_column, pos
     def _highlight_negative(value):
         if value != positive_value:
             return f"color: {styles.COLOR_BURGUNDY}; font-weight: 700;"
-        return f"color: {styles.COLOR_DARK_SLATE}; font-weight: 600;"
+        return f"color: {styles.COLOR_BLACK}; font-weight: 600;"
 
-    styled_df = table_df.style.applymap(_highlight_negative, subset=[status_column])
+    styled_df = table_df.style.map(_highlight_negative, subset=[status_column])
     st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
 

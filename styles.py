@@ -13,7 +13,6 @@ import streamlit as st
 COLOR_WHITE = "#FFFFFF"
 COLOR_BLACK = "#000000"
 COLOR_LIGHT_GREY = "#E6E6E6"
-COLOR_DARK_SLATE = "#36454F"
 COLOR_BURGUNDY = "#6B1F2B"
 COLOR_MEDIUM_GREY = "#B8B8B8"
 
@@ -36,10 +35,10 @@ def apply_custom_styles():
 
         /* Header / brand block */
         .om-header {{
-            background-color: {COLOR_DARK_SLATE};
+            background-color: {COLOR_BURGUNDY};
             padding: 1.5rem 2rem;
             margin-bottom: 1.5rem;
-            border-left: 6px solid {COLOR_BURGUNDY};
+            border-left: 6px solid {COLOR_BLACK};
         }}
         .om-header h1 {{
             color: {COLOR_WHITE};
@@ -77,7 +76,7 @@ def apply_custom_styles():
 
         /* Buttons */
         div.stButton > button {{
-            background-color: {COLOR_DARK_SLATE};
+            background-color: {COLOR_BURGUNDY};
             color: {COLOR_WHITE};
             border: none;
             border-radius: 2px;
@@ -85,8 +84,8 @@ def apply_custom_styles():
             font-weight: 600;
         }}
         div.stButton > button:hover {{
-            background-color: {COLOR_BURGUNDY};
-            color: {COLOR_WHITE};
+            background-color: {COLOR_LIGHT_GREY};
+            color: {COLOR_BURGUNDY};
         }}
         div.stButton > button:disabled {{
             background-color: {COLOR_MEDIUM_GREY};
@@ -102,7 +101,7 @@ def apply_custom_styles():
 
         /* Tables */
         thead tr th {{
-            background-color: {COLOR_DARK_SLATE} !important;
+            background-color: {COLOR_BURGUNDY} !important;
             color: {COLOR_WHITE} !important;
         }}
 
@@ -118,7 +117,7 @@ def apply_custom_styles():
             margin-bottom: 0.25rem;
         }}
         .om-context-line strong {{
-            color: {COLOR_DARK_SLATE};
+            color: {COLOR_BURGUNDY};
         }}
         </style>
         """,

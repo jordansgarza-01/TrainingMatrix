@@ -23,7 +23,7 @@ data.py        Centralized prototype data model (Business Line -> Supervisor
 ui.py          Screen rendering functions (login, selection screens,
                training profile dashboard, reusable table/metric helpers)
 styles.py      Owens & Minor color palette, RAG status colors, and CSS
-assets/favicon.png     Browser tab icon (source of the burgundy accent color)
+O&M (3).png            Browser tab icon (source of the burgundy accent color)
 .streamlit/config.toml Streamlit theme (keeps widget accent colors burgundy)
 requirements.txt   Python dependencies
 ```

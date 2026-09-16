@@ -66,7 +66,7 @@ def _reset_session(logout=False):
 # ---------------------------------------------------------------------------
 def render_business_line_supervisor_screen():
     """Render the Business Line / Supervisor selection screen."""
-    styles.render_header(breadcrumb_stage="Business Line")
+    styles.render_header(breadcrumb_stage=["Business Line", "Supervisor"])
     st.subheader("Select Business Line and Supervisor")
 
     business_line = st.selectbox("Business Line", data.BUSINESS_LINES, key="business_line_widget")
@@ -82,7 +82,12 @@ def render_business_line_supervisor_screen():
 
     has_valid_selection = business_line in data.BUSINESS_LINES and supervisor in valid_supervisors
 
-    if st.button("Continue", disabled=not has_valid_selection):
+    _, button_col, _ = st.columns([1, 1, 1])
+    with button_col:
+        continue_clicked = st.button(
+            "Continue", disabled=not has_valid_selection, use_container_width=True
+        )
+    if continue_clicked:
         st.session_state.business_line = business_line
         st.session_state.supervisor = supervisor
         st.session_state.teammate = None
@@ -111,9 +116,11 @@ def render_teammate_selection_screen():
             "No teammates were found for this Supervisor. "
             "Please return to the previous screen and select a valid Supervisor."
         )
-        if st.button("Back to Business Line / Supervisor Selection"):
-            _reset_session()
-            st.rerun()
+        _, error_button_col, _ = st.columns([1, 1, 1])
+        with error_button_col:
+            if st.button("Back to Business Line / Supervisor Selection", use_container_width=True):
+                _reset_session()
+                st.rerun()
         return
 
     def _on_teammate_change():
@@ -128,9 +135,11 @@ def render_teammate_selection_screen():
         on_change=_on_teammate_change,
     )
 
-    if st.button("Back to Business Line / Supervisor Selection"):
-        _reset_session()
-        st.rerun()
+    _, back_button_col, _ = st.columns([1, 1, 1])
+    with back_button_col:
+        if st.button("Back to Business Line / Supervisor Selection", use_container_width=True):
+            _reset_session()
+            st.rerun()
 
 
 # ---------------------------------------------------------------------------
@@ -151,9 +160,11 @@ def render_training_profile_screen():
             f"No training record could be found for '{teammate}'. "
             "Please select a different Teammate."
         )
-        if st.button("Back to Teammate Selection"):
-            st.session_state.teammate = None
-            st.rerun()
+        _, error_button_col, _ = st.columns([1, 1, 1])
+        with error_button_col:
+            if st.button("Back to Teammate Selection", use_container_width=True):
+                st.session_state.teammate = None
+                st.rerun()
         return
 
     st.markdown(
@@ -164,13 +175,13 @@ def render_training_profile_screen():
     )
     st.title("Teammate Training Profile")
 
-    col1, col2 = st.columns(2)
+    _, col1, col2, _ = st.columns([1, 1, 1, 1])
     with col1:
-        if st.button("Change Teammate"):
+        if st.button("Change Teammate", use_container_width=True):
             st.session_state.teammate = None
             st.rerun()
     with col2:
-        if st.button("Change Business Line / Supervisor"):
+        if st.button("Change Business Line / Supervisor", use_container_width=True):
             _reset_session()
             st.rerun()
 
@@ -224,7 +235,7 @@ def _render_summary_metrics(record):
 
 def _render_status_table(title, status_dict, category_column, status_column, key_prefix):
     """Render a searchable, filterable, RAG-formatted training status table."""
-    st.markdown(f'<div class="om-section-title">{title}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="om-table-title">{title}</div>', unsafe_allow_html=True)
 
     if not status_dict:
         st.info(f"No {title.lower()} records are available for this teammate.")

@@ -1,4 +1,4 @@
-# Owens & Minor — Teammate Training & Development
+# Owens & Minor — Teammate Training & Development Platform
 
 ## Purpose
 

@@ -17,12 +17,12 @@ COLOR_BURGUNDY = "#800002"  # sampled directly from the O&M favicon artwork
 COLOR_MEDIUM_GREY = "#B8B8B8"
 
 # RAG (Red/Amber/Green) status flag colors used across all training tables.
-COLOR_RAG_GREEN_BG = "#E1F5E4"
-COLOR_RAG_GREEN_TEXT = "#1E7B34"
-COLOR_RAG_RED_BG = "#FBE2E2"
-COLOR_RAG_RED_TEXT = "#B00020"
-COLOR_RAG_YELLOW_BG = "#FFF6D8"
-COLOR_RAG_YELLOW_TEXT = "#8A6D00"
+COLOR_RAG_GREEN_BG = "#C8ECC9"
+COLOR_RAG_GREEN_TEXT = "#155724"
+COLOR_RAG_RED_BG = "#F5C6C6"
+COLOR_RAG_RED_TEXT = "#7A0000"
+COLOR_RAG_YELLOW_BG = "#FCE8A4"
+COLOR_RAG_YELLOW_TEXT = "#5C4500"
 
 RAG_COLORS = {
     "Yes": (COLOR_RAG_GREEN_BG, COLOR_RAG_GREEN_TEXT),
@@ -109,16 +109,30 @@ def apply_custom_styles():
             margin-bottom: 0.75rem;
         }}
 
-        /* Buttons — outlined, fills on hover for a brighter, sleeker look */
+        /* Table title headings (Job Function Training, MHE Certification, ETQ Training) */
+        .om-table-title {{
+            color: {COLOR_BLACK};
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-bottom: 2px solid {COLOR_BURGUNDY};
+            padding-bottom: 0.3rem;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }}
+
+        /* Buttons — light grey by default, deep burgundy when highlighted */
         div.stButton > button {{
-            background-color: {COLOR_WHITE};
+            background-color: {COLOR_LIGHT_GREY};
             color: {COLOR_BURGUNDY};
-            border: 2px solid {COLOR_BURGUNDY};
+            border: 2px solid {COLOR_LIGHT_GREY};
             border-radius: 2px;
             padding: 0.5rem 1.5rem;
             font-weight: 600;
         }}
-        div.stButton > button:hover {{
+        div.stButton > button:hover,
+        div.stButton > button:focus,
+        div.stButton > button:active {{
             background-color: {COLOR_BURGUNDY};
             color: {COLOR_WHITE};
             border: 2px solid {COLOR_BURGUNDY};
@@ -131,7 +145,7 @@ def apply_custom_styles():
 
         /* Metric cards */
         div[data-testid="stMetric"] {{
-            background-color: {COLOR_WHITE};
+            background-color: {COLOR_LIGHT_GREY};
             border: 1px solid {COLOR_LIGHT_GREY};
             border-left: 4px solid {COLOR_BURGUNDY};
             padding: 0.75rem 1rem;
@@ -178,12 +192,18 @@ def apply_custom_styles():
 
 
 def render_header(breadcrumb_stage=None):
-    """Render the persistent Owens & Minor application header."""
+    """Render the persistent Owens & Minor application header.
+
+    `breadcrumb_stage` may be a single stage name or an iterable of stage
+    names, allowing multiple stages to be highlighted at once (e.g. the
+    Business Line / Supervisor screen highlights both stages together).
+    """
     breadcrumb_html = ""
     if breadcrumb_stage:
+        active_stages = {breadcrumb_stage} if isinstance(breadcrumb_stage, str) else set(breadcrumb_stage)
         parts = []
         for stage in WORKFLOW_STAGES:
-            css_class = "active" if stage == breadcrumb_stage else ""
+            css_class = "active" if stage in active_stages else ""
             parts.append(f'<span class="{css_class}">{stage}</span>')
         breadcrumb_html = f'<div class="om-breadcrumb">{" &rarr; ".join(parts)}</div>'
 
@@ -191,7 +211,7 @@ def render_header(breadcrumb_stage=None):
         f"""
         <div class="om-header">
             <h1>Owens &amp; Minor</h1>
-            <h2>Teammate Training &amp; Development</h2>
+            <h2>Teammate Training &amp; Development Platform</h2>
             {breadcrumb_html}
         </div>
         """,

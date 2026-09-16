@@ -176,13 +176,13 @@ def render_training_profile_screen():
 
     _render_summary_metrics(record)
     _render_status_table(
-        "Job Function Training", record["job_function_training"], "Job Function", "Training Status", "Yes"
+        "Job Function Training", record["job_function_training"], "Job Function", "Training Status", "job"
     )
     _render_status_table(
-        "MHE Certification", record["mhe_certifications"], "MHE / PIT Type", "Certified", "Yes"
+        "MHE Certification", record["mhe_certifications"], "MHE / PIT Type", "Certified", "mhe"
     )
     _render_status_table(
-        "ETQ Training", record["etq_training"], "ETQ Training Group", "Status", "Complete"
+        "ETQ Training", record["etq_training"], "ETQ Training Group", "Status", "etq"
     )
     _render_training_gaps(record)
 
@@ -193,9 +193,9 @@ def _compute_summary_metrics(record):
     mhe_data = record["mhe_certifications"]
     etq_data = record["etq_training"]
 
-    job_trained = sum(1 for v in job_data.values() if v == "Yes")
-    mhe_certified = sum(1 for v in mhe_data.values() if v == "Yes")
-    etq_complete = sum(1 for v in etq_data.values() if v == "Complete")
+    job_trained = sum(1 for v in job_data.values() if v["status"] == "Yes")
+    mhe_certified = sum(1 for v in mhe_data.values() if v["status"] == "Yes")
+    etq_complete = sum(1 for v in etq_data.values() if v["status"] == "Complete")
 
     total_items = len(job_data) + len(mhe_data) + len(etq_data)
     total_complete = job_trained + mhe_certified + etq_complete
@@ -222,8 +222,8 @@ def _render_summary_metrics(record):
     cols[4].metric("Overall Completion", f"{metrics['overall_pct']}%")
 
 
-def _render_status_table(title, status_dict, category_column, status_column, positive_value):
-    """Render a reusable, conditionally formatted training status table."""
+def _render_status_table(title, status_dict, category_column, status_column, key_prefix):
+    """Render a searchable, filterable, RAG-formatted training status table."""
     st.markdown(f'<div class="om-section-title">{title}</div>', unsafe_allow_html=True)
 
     if not status_dict:
@@ -231,25 +231,94 @@ def _render_status_table(title, status_dict, category_column, status_column, pos
         return
 
     table_df = pd.DataFrame(
-        [{category_column: item, status_column: status} for item, status in status_dict.items()]
+        [
+            {category_column: item, status_column: entry["status"], "Assigned To": entry["assigned_to"]}
+            for item, entry in status_dict.items()
+        ]
     )
 
-    def _highlight_negative(value):
-        if value != positive_value:
-            return f"color: {styles.COLOR_BURGUNDY}; font-weight: 700;"
-        return f"color: {styles.COLOR_BLACK}; font-weight: 600;"
+    # Quick lookup: selecting a category value updates the status shown
+    # alongside it, without needing to scan the full table below.
+    lookup_col, result_col = st.columns(2)
+    with lookup_col:
+        lookup_item = st.selectbox(
+            f"Quick Lookup: {category_column}",
+            table_df[category_column].tolist(),
+            key=f"{key_prefix}_lookup_item",
+        )
+    with result_col:
+        st.selectbox(
+            f"{status_column} (auto)",
+            [status_dict[lookup_item]["status"]],
+            index=0,
+            disabled=True,
+            key=f"{key_prefix}_lookup_status",
+        )
 
-    styled_df = table_df.style.map(_highlight_negative, subset=[status_column])
-    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    # Search and filter controls
+    search_col, status_col, assigned_col = st.columns([2, 1, 1])
+    with search_col:
+        search_term = st.text_input(f"Search {category_column}", key=f"{key_prefix}_search")
+    with status_col:
+        status_options = sorted(table_df[status_column].unique())
+        status_filter = st.multiselect(
+            status_column, status_options, default=status_options, key=f"{key_prefix}_status_filter"
+        )
+    with assigned_col:
+        assigned_options = sorted(table_df["Assigned To"].unique())
+        assigned_filter = st.multiselect(
+            "Assigned To", assigned_options, default=assigned_options, key=f"{key_prefix}_assigned_filter"
+        )
+
+    filtered_df = table_df[
+        table_df[category_column].str.contains(search_term, case=False, na=False)
+        & table_df[status_column].isin(status_filter)
+        & table_df["Assigned To"].isin(assigned_filter)
+    ]
+
+    if filtered_df.empty:
+        st.warning("No rows match the current search/filter criteria.")
+        return
+
+    st.markdown(_build_status_table_html(filtered_df, status_column), unsafe_allow_html=True)
+
+
+def _build_status_table_html(table_df, status_column):
+    """Render a DataFrame as a bordered HTML table with RAG-colored status cells."""
+    header_html = "".join(f"<th>{column}</th>" for column in table_df.columns)
+
+    row_html_parts = []
+    for _, row in table_df.iterrows():
+        cells = []
+        for column in table_df.columns:
+            value = row[column]
+            if column == status_column:
+                bg_color, text_color = styles.RAG_COLORS.get(
+                    value, (styles.COLOR_LIGHT_GREY, styles.COLOR_BLACK)
+                )
+                cells.append(
+                    f'<td style="background-color:{bg_color}; color:{text_color};">'
+                    f"<strong>{value}</strong></td>"
+                )
+            else:
+                cells.append(f"<td>{value}</td>")
+        row_html_parts.append(f"<tr>{''.join(cells)}</tr>")
+
+    return (
+        '<table class="om-data-table">'
+        f"<thead><tr>{header_html}</tr></thead>"
+        f"<tbody>{''.join(row_html_parts)}</tbody>"
+        "</table>"
+    )
 
 
 def _render_training_gaps(record):
     """Render the dynamically generated Training Gaps summary."""
     st.markdown('<div class="om-section-title">Training Gaps</div>', unsafe_allow_html=True)
 
-    job_gaps = [item for item, status in record["job_function_training"].items() if status == "No"]
-    mhe_gaps = [item for item, status in record["mhe_certifications"].items() if status == "No"]
-    etq_gaps = [item for item, status in record["etq_training"].items() if status == "Incomplete"]
+    job_gaps = [item for item, entry in record["job_function_training"].items() if entry["status"] == "No"]
+    mhe_gaps = [item for item, entry in record["mhe_certifications"].items() if entry["status"] == "No"]
+    etq_gaps = [item for item, entry in record["etq_training"].items() if entry["status"] == "Incomplete"]
 
     if not (job_gaps or mhe_gaps or etq_gaps):
         st.markdown(

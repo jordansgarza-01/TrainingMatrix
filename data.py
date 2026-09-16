@@ -110,10 +110,33 @@ ETQ_TRAINING_GROUPS = [
 ]
 
 
-def _build_status_map(rng, items, positive_value, negative_value, completion_rate):
-    """Return {item: positive/negative value}, weighted by a completion rate."""
+# Teammates working on a given item can also be "In Process" rather than a
+# strict positive/negative, and every item is assigned to one of two
+# training coordinators for follow-up.
+ASSIGNED_TO_OPTIONS = ("Jordan Garza", "Tanner Bourgeois")
+
+# Share of the "not yet positive" probability mass that becomes "In Process"
+# rather than a hard negative.
+_IN_PROCESS_SHARE = 0.4
+
+
+def _choose_status(rng, completion_rate, positive_value, negative_value, in_process_value):
+    """Randomly select a 3-state status weighted by a completion rate."""
+    roll = rng.random()
+    if roll < completion_rate:
+        return positive_value
+    if roll < completion_rate + (1 - completion_rate) * _IN_PROCESS_SHARE:
+        return in_process_value
+    return negative_value
+
+
+def _build_status_map(rng, items, positive_value, negative_value, in_process_value, completion_rate):
+    """Return {item: {"status": ..., "assigned_to": ...}}, weighted by a completion rate."""
     return {
-        item: positive_value if rng.random() < completion_rate else negative_value
+        item: {
+            "status": _choose_status(rng, completion_rate, positive_value, negative_value, in_process_value),
+            "assigned_to": rng.choice(ASSIGNED_TO_OPTIONS),
+        }
         for item in items
     }
 
@@ -133,13 +156,13 @@ def _generate_teammate_record(teammate_name, supervisor):
         "business_line": SUPERVISOR_BUSINESS_LINE[supervisor],
         "supervisor": supervisor,
         "job_function_training": _build_status_map(
-            rng, JOB_FUNCTIONS, "Yes", "No", completion_rate
+            rng, JOB_FUNCTIONS, "Yes", "No", "In Process", completion_rate
         ),
         "mhe_certifications": _build_status_map(
-            rng, MHE_TYPES, "Yes", "No", completion_rate
+            rng, MHE_TYPES, "Yes", "No", "In Process", completion_rate
         ),
         "etq_training": _build_status_map(
-            rng, ETQ_TRAINING_GROUPS, "Complete", "Incomplete", completion_rate
+            rng, ETQ_TRAINING_GROUPS, "Complete", "Incomplete", "In Process", completion_rate
         ),
     }
 

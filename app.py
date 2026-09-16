@@ -14,6 +14,7 @@ import ui
 
 st.set_page_config(
     page_title="Owens & Minor | Teammate Training & Development",
+    page_icon="assets/favicon.png",
     layout="wide",
 )
 

@@ -22,7 +22,9 @@ data.py        Centralized prototype data model (Business Line -> Supervisor
                -> Teammate -> training records) and load_training_data()
 ui.py          Screen rendering functions (login, selection screens,
                training profile dashboard, reusable table/metric helpers)
-styles.py      Owens & Minor color palette and CSS/header components
+styles.py      Owens & Minor color palette, RAG status colors, and CSS
+assets/favicon.png     Browser tab icon (source of the burgundy accent color)
+.streamlit/config.toml Streamlit theme (keeps widget accent colors burgundy)
 requirements.txt   Python dependencies
 ```
 
@@ -99,7 +101,12 @@ enterprise data source. To connect a real backend:
    CSV import, REST API call, etc.).
 2. Return the same shape: a dict keyed by `teammate_name`, where each value
    is a record with `teammate_name`, `business_line`, `supervisor`,
-   `job_function_training`, `mhe_certifications`, and `etq_training`.
+   `job_function_training`, `mhe_certifications`, and `etq_training`. Each
+   of those three training dicts maps an item name to
+   `{"status": ..., "assigned_to": ...}`, where `status` is one of
+   `Yes` / `No` / `In Process` (or `Complete` / `Incomplete` / `In Process`
+   for ETQ) and `assigned_to` is the training coordinator responsible for
+   that item.
 3. Optionally replace `BUSINESS_LINE_SUPERVISORS` and
    `SUPERVISOR_TEAMMATES` with data pulled from the same source so the
    Business Line/Supervisor/Teammate hierarchy stays in sync.
